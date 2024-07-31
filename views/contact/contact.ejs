@@ -1,0 +1,245 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Contacts</h2>
+  <button
+    class="btn btn-primary"
+    data-toggle="modal"
+    data-target="#addContactModal"
+  >
+    Add Contact
+  </button>
+</div>
+
+<form class="form-inline mb-3" id="searchForm">
+  <input
+    class="form-control mr-sm-2"
+    type="search"
+    placeholder="Search by name"
+    aria-label="Search"
+    id="searchInput"
+  />
+  <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+    Search
+  </button>
+</form>
+
+<% if (error) { %>
+<div class="alert alert-danger" role="alert"><%= error %></div>
+<% } else if (contacts && contacts.length > 0) { %>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Full Name</th>
+      <th scope="col">Phone Number</th>
+      <th scope="col">Email</th>
+      <th scope="col">Actions</th>
+    </tr>
+  </thead>
+  <tbody id="contactTableBody">
+    <% contacts.forEach((contact, index) => { %>
+    <tr>
+      <th scope="row"><%= index + 1 %></th>
+      <td class="contact-name"><%= contact.fullName %></td>
+      <td><%= contact.phoneNumber %></td>
+      <td><%= contact.email %></td>
+      <td>
+        <button
+          class="btn btn-sm btn-secondary edit-contact"
+          data-id="<%= index %>"
+          data-fullname="<%= contact.fullName %>"
+          data-phonenumber="<%= contact.phoneNumber %>"
+          data-email="<%= contact.email %>"
+        >
+          <i class="fas fa-pencil-alt"></i>
+        </button>
+        <form
+          action="/contact/deleteContact"
+          method="POST"
+          style="display: inline"
+        >
+          <!-- <input type="hidden" name="id" value="<%= index %>" /> -->
+          <button type="submit" class="btn btn-sm btn-danger">
+            <i class="fas fa-trash"></i>
+          </button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } else { %>
+<div class="alert alert-info" role="alert">No contacts found.</div>
+<% } %>
+
+<!-- Add Contact Modal -->
+<div
+  class="modal fade"
+  id="addContactModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="addContactModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addContactModalLabel">Add Contact</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/contact/addContact" method="POST">
+          <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="fullName"
+              name="fullName"
+              placeholder="Enter full name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="phoneNumber">Phone Number</label>
+            <input
+              type="text"
+              class="form-control"
+              id="phoneNumber"
+              name="phoneNumber"
+              placeholder="Enter phone number"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              placeholder="Enter email"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Contact Modal -->
+<div
+  class="modal fade"
+  id="editContactModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="editContactModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editContactModalLabel">Edit Contact</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form
+          id="editContactForm"
+          action="/contact/updateContact"
+          method="POST"
+        >
+          <input type="hidden" id="editContactId" name="id" />
+          <div class="form-group">
+            <label for="editFullName">Full Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="editFullName"
+              name="fullName"
+              placeholder="Enter full name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="editPhoneNumber">Phone Number</label>
+            <input
+              type="text"
+              class="form-control"
+              id="editPhoneNumber"
+              name="phoneNumber"
+              placeholder="Enter phone number"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="editEmail">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="editEmail"
+              name="email"
+              placeholder="Enter email"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll(".edit-contact").forEach((button) => {
+    button.addEventListener("click", function () {
+      var id = this.getAttribute("data-id");
+      var fullName = this.getAttribute("data-fullname");
+      var phoneNumber = this.getAttribute("data-phonenumber");
+      var email = this.getAttribute("data-email");
+
+      var modal = document.getElementById("editContactModal");
+      modal.querySelector("#editContactId").value = id;
+      modal.querySelector("#editFullName").value = fullName;
+      modal.querySelector("#editPhoneNumber").value = phoneNumber;
+      modal.querySelector("#editEmail").value = email;
+
+      $("#editContactModal").modal("show");
+    });
+  });
+
+  document
+    .getElementById("searchForm")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+      var searchInput = document
+        .getElementById("searchInput")
+        .value.toLowerCase();
+      var contactTableBody = document.getElementById("contactTableBody");
+      var rows = contactTableBody.getElementsByTagName("tr");
+      for (var i = 0; i < rows.length; i++) {
+        var contactName = rows[i]
+          .getElementsByClassName("contact-name")[0]
+          .innerText.toLowerCase();
+        if (contactName.includes(searchInput) || searchInput === "") {
+          rows[i].style.display = "";
+        } else {
+          rows[i].style.display = "none";
+        }
+      }
+    });
+</script>
