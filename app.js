@@ -1,4 +1,5 @@
 const express = require("express");
+const { body, validationResult } = require("express-validator"); // Import validation functions
 const app = express();
 const expressLayouts = require("express-ejs-layouts");
 const fs = require("fs");
@@ -53,17 +54,44 @@ app.get("/", (req, res) => {
 app.get("/contact", async (req, res) => {
   try {
     const contacts = await readContacts();
-    res.render("contact/contact", { title: "Contact", contacts, error: null });
+    const alert = req.query.alert; // Read alert query parameter
+    res.render("contact/contact", {
+      title: "Contact",
+      contacts,
+      alert,
+      error: null,
+    });
   } catch (err) {
     res.render("contact/contact", {
       title: "Contact",
       contacts: null,
+      alert: null,
       error: "No contact saved",
     });
   }
 });
 
-app.post("/contact/addContact", async (req, res) => {
+// Validation middleware
+const contactValidation = [
+  body("fullName").notEmpty().withMessage("Full name is required."),
+  body("email").isEmail().withMessage("Invalid email address."),
+  body("phoneNumber")
+    .matches(
+      /^(\+?62|0)8(1[123456789]|2[1238]|3[1238]|5[12356789]|7[78]|9[56789]|8[123456789])([\s?|\d]{5,11})$/
+    )
+    .withMessage("Invalid phone number."),
+];
+
+app.post("/contact/addContact", contactValidation, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const alert = errors
+      .array()
+      .map((err) => err.msg)
+      .join(", "); // Collect errors
+    return res.redirect(`/contact?alert=${encodeURIComponent(alert)}`); // Redirect with alert
+  }
+
   const { fullName, phoneNumber, email } = req.body;
   try {
     const contacts = await readContacts();
@@ -79,7 +107,16 @@ app.post("/contact/addContact", async (req, res) => {
   }
 });
 
-app.post("/contact/updateContact", async (req, res) => {
+app.post("/contact/updateContact", contactValidation, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const alert = errors
+      .array()
+      .map((err) => err.msg)
+      .join(", "); // Collect errors
+    return res.redirect(`/contact?alert=${encodeURIComponent(alert)}`); // Redirect with alert
+  }
+
   const { id, fullName, phoneNumber, email } = req.body;
   try {
     const contacts = await readContacts();
