@@ -57,7 +57,7 @@
           method="POST"
           style="display: inline"
         >
-          <!-- <input type="hidden" name="id" value="<%= index %>" /> -->
+          <input type="hidden" name="id" value="<%= index %>" />
           <button type="submit" class="btn btn-sm btn-danger">
             <i class="fas fa-trash"></i>
           </button>
@@ -94,7 +94,12 @@
         </button>
       </div>
       <div class="modal-body">
-        <form action="/contact/addContact" method="POST">
+        <form
+          id="addContactForm"
+          action="/contact/addContact"
+          method="POST"
+          novalidate
+        >
           <div class="form-group">
             <label for="fullName">Full Name</label>
             <input
@@ -105,6 +110,7 @@
               placeholder="Enter full name"
               required
             />
+            <div class="invalid-feedback">Full name is required.</div>
           </div>
           <div class="form-group">
             <label for="phoneNumber">Phone Number</label>
@@ -115,7 +121,11 @@
               name="phoneNumber"
               placeholder="Enter phone number"
               required
+              pattern="^(\+62|62|0)(8[1-9][0-9]{6,11}|2[1-9][0-9]{6,10})$"
             />
+            <div class="invalid-feedback">
+              Please enter a valid 10-digit phone number.
+            </div>
           </div>
           <div class="form-group">
             <label for="email">Email</label>
@@ -127,6 +137,9 @@
               placeholder="Enter email"
               required
             />
+            <div class="invalid-feedback">
+              Please enter a valid email address.
+            </div>
           </div>
           <button type="submit" class="btn btn-primary">Submit</button>
         </form>
@@ -162,6 +175,7 @@
           id="editContactForm"
           action="/contact/updateContact"
           method="POST"
+          novalidate
         >
           <input type="hidden" id="editContactId" name="id" />
           <div class="form-group">
@@ -174,6 +188,7 @@
               placeholder="Enter full name"
               required
             />
+            <div class="invalid-feedback">Full name is required.</div>
           </div>
           <div class="form-group">
             <label for="editPhoneNumber">Phone Number</label>
@@ -184,7 +199,11 @@
               name="phoneNumber"
               placeholder="Enter phone number"
               required
+              pattern="^(\+62|62|0)(8[1-9][0-9]{6,11}|2[1-9][0-9]{6,10})$"
             />
+            <div class="invalid-feedback">
+              Please enter a valid 10-digit phone number.
+            </div>
           </div>
           <div class="form-group">
             <label for="editEmail">Email</label>
@@ -196,6 +215,9 @@
               placeholder="Enter email"
               required
             />
+            <div class="invalid-feedback">
+              Please enter a valid email address.
+            </div>
           </div>
           <button type="submit" class="btn btn-primary">Update</button>
         </form>
@@ -205,6 +227,7 @@
 </div>
 
 <script>
+  // Edit Modal Autofill
   document.querySelectorAll(".edit-contact").forEach((button) => {
     button.addEventListener("click", function () {
       var id = this.getAttribute("data-id");
@@ -222,6 +245,36 @@
     });
   });
 
+  // Client-side validation for Add and Edit Contact forms
+  function validateForm(form) {
+    if (form.checkValidity() === false) {
+      form.classList.add("was-validated");
+      return false;
+    }
+    return true;
+  }
+
+  // Add Contact Form Validation
+  document
+    .getElementById("addContactForm")
+    .addEventListener("submit", function (event) {
+      if (!validateForm(this)) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    });
+
+  // Edit Contact Form Validation
+  document
+    .getElementById("editContactForm")
+    .addEventListener("submit", function (event) {
+      if (!validateForm(this)) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    });
+
+  // Search functionality
   document
     .getElementById("searchForm")
     .addEventListener("submit", function (event) {
